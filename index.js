@@ -242,4 +242,4 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 // =====================
-client.login("MTQ5OTA0MTA4NjU3ODg4NDYwOA.GSUfUJ.QwPXLhLohbeyjPR4p-GBy-swiap13pVIkfFP0I");
+client.login("MTQ5OTA0MTA4NjU3ODg4NDYwOA.GWlEee.n7An4p3kamIzguQvTV8ZzP10YQUCdn1sX-mX3I");
