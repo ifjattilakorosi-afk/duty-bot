@@ -9,6 +9,16 @@ const {
 } = require("discord.js");
 
 const fs = require("fs");
+const express = require("express"); // ⭐ FIX Render sleep ellen
+
+// =====================
+// KEEP ALIVE SERVER (Render fix)
+// =====================
+const app = express();
+app.get("/", (req, res) => res.send("Bot is alive"));
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Web server running");
+});
 
 // =====================
 // BOT
@@ -28,14 +38,12 @@ const client = new Client({
 let dutyStart = {};
 let totalTime = {};
 
-// load data
 if (fs.existsSync("./data.json")) {
   const data = JSON.parse(fs.readFileSync("./data.json", "utf8"));
   dutyStart = data.dutyStart || {};
   totalTime = data.totalTime || {};
 }
 
-// save data
 function save() {
   fs.writeFileSync("./data.json", JSON.stringify({ dutyStart, totalTime }, null, 2));
 }
@@ -45,10 +53,10 @@ function save() {
 // =====================
 const STAFF_ROLE_NAME = "Tulaj";
 
-// >>> JUMPSCARE KÉP <<<
-const JUMPSCARE_IMAGE = "https://cdn.discordapp.com/attachments/1489342270644686911/1499492866756444370/image.gif?ex=69f4ff0e&is=69f3ad8e&hm=52e6137b97d2e7da25f5a3570489e262ac1c77e1fd870004dfe6644b729d259a&";
+const JUMPSCARE_IMAGE =
+  "https://cdn.discordapp.com/attachments/1489342270644686911/1499492866756444370/image.gif";
 
-// duty-2 channel
+// duty channel
 function getDutyChannel(guild) {
   return guild.channels.cache.find(c => c.name === "duty-2");
 }
@@ -75,7 +83,7 @@ function hasPerm(member) {
 // =====================
 // READY
 // =====================
-client.once("ready", () => {
+client.once("clientReady", () => {
   console.log("BOT ONLINE:", client.user.tag);
 });
 
@@ -85,43 +93,26 @@ client.once("ready", () => {
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
-  // =====================
-  // !ibi (JUMPSCARE)
-  // =====================
+  // !ibi
   if (message.content === "!ibi") {
-
     await message.channel.send("...");
 
     setTimeout(() => {
       message.channel.send({
-        content: "😱 JUMPSCARE! ",
+        content: "😱 JUMPSCARE!",
         files: [JUMPSCARE_IMAGE]
       });
     }, 1500);
   }
 
-  // =====================
   // !duty
-  // =====================
   if (message.content === "!duty") {
-
     if (!hasPerm(message.member)) return;
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("duty_on")
-        .setLabel("🟢 Duty ON")
-        .setStyle(ButtonStyle.Success),
-
-      new ButtonBuilder()
-        .setCustomId("duty_off")
-        .setLabel("🔴 Duty OFF")
-        .setStyle(ButtonStyle.Danger),
-
-      new ButtonBuilder()
-        .setCustomId("duty_all")
-        .setLabel("📊 Összes idő")
-        .setStyle(ButtonStyle.Primary)
+      new ButtonBuilder().setCustomId("duty_on").setLabel("🟢 Duty ON").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("duty_off").setLabel("🔴 Duty OFF").setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId("duty_all").setLabel("📊 Összes idő").setStyle(ButtonStyle.Primary)
     );
 
     return message.channel.send({
@@ -130,11 +121,8 @@ client.on("messageCreate", async (message) => {
     });
   }
 
-  // =====================
   // !clear
-  // =====================
   if (message.content === "!clear") {
-
     if (!hasPerm(message.member)) return;
 
     const messages = await message.channel.messages.fetch({ limit: 100 });
@@ -142,15 +130,10 @@ client.on("messageCreate", async (message) => {
 
     const dutyChannel = getDutyChannel(message.guild);
     if (dutyChannel) dutyChannel.send("🧹 chat törölve");
-
-    return;
   }
 
-  // =====================
-  // !delete X
-  // =====================
+  // !delete
   if (message.content.startsWith("!delete")) {
-
     if (!hasPerm(message.member)) return;
 
     const amount = parseInt(message.content.replace("!delete", ""));
@@ -173,11 +156,8 @@ client.on("messageCreate", async (message) => {
     message.channel.send(`🧹 törölve: ${deleted}`);
   }
 
-  // =====================
   // !osszido
-  // =====================
   if (message.content.startsWith("!osszido")) {
-
     if (!hasPerm(message.member)) return;
 
     const user = message.mentions.users.first();
@@ -204,7 +184,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const dutyChannel = getDutyChannel(interaction.guild);
 
   if (interaction.customId === "duty_on") {
-
     if (dutyStart[id]) {
       return interaction.reply({ content: "❌ már dutyban vagy!", ephemeral: true });
     }
@@ -212,15 +191,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
     dutyStart[id] = Date.now();
     save();
 
-    if (dutyChannel) {
-      dutyChannel.send(`🟢 ${name} belépett szolgálatba`);
-    }
+    if (dutyChannel) dutyChannel.send(`🟢 ${name} belépett szolgálatba`);
 
     return interaction.reply({ content: "Duty ON", ephemeral: true });
   }
 
   if (interaction.customId === "duty_off") {
-
     if (!dutyStart[id]) {
       return interaction.reply({ content: "❌ nem vagy dutyban!", ephemeral: true });
     }
@@ -231,20 +207,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
     totalTime[id] = (totalTime[id] || 0) + diff;
     save();
 
-    if (dutyChannel) {
-      dutyChannel.send(`🔴 ${name} kilépett | ${format(diff)}`);
-    }
+    if (dutyChannel) dutyChannel.send(`🔴 ${name} kilépett | ${format(diff)}`);
 
     return interaction.reply({ content: "Duty OFF", ephemeral: true });
   }
 
   if (interaction.customId === "duty_all") {
-
     const time = totalTime[id] || 0;
 
-    if (dutyChannel) {
-      dutyChannel.send(`📊 ${name} összes ideje: ${format(time)}`);
-    }
+    if (dutyChannel) dutyChannel.send(`📊 ${name} összes ideje: ${format(time)}`);
 
     return interaction.reply({ content: "Kiírva duty-2-be", ephemeral: true });
   }
@@ -252,13 +223,3 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // =====================
 client.login(process.env.TOKEN);
-const express = require("express");
-const app = express();
-
-app.get("/", (req, res) => {
-  res.send("Bot is alive");
-});
-
-app.listen(3000, () => {
-  console.log("Keep-alive server running");
-});
