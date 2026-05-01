@@ -45,6 +45,9 @@ function save() {
 // =====================
 const STAFF_ROLE_NAME = "Tulaj";
 
+// >>> JUMPSCARE KÉP <<<
+const JUMPSCARE_IMAGE = "https://cdn.discordapp.com/attachments/1489342270644686911/1499492866756444370/image.gif?ex=69f4ff0e&is=69f3ad8e&hm=52e6137b97d2e7da25f5a3570489e262ac1c77e1fd870004dfe6644b729d259a&";
+
 // duty-2 channel
 function getDutyChannel(guild) {
   return guild.channels.cache.find(c => c.name === "duty-2");
@@ -81,6 +84,21 @@ client.once("ready", () => {
 // =====================
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
+
+  // =====================
+  // !ibi (JUMPSCARE)
+  // =====================
+  if (message.content === "!ibi") {
+
+    await message.channel.send("...");
+
+    setTimeout(() => {
+      message.channel.send({
+        content: "😱 JUMPSCARE! ",
+        files: [JUMPSCARE_IMAGE]
+      });
+    }, 1500);
+  }
 
   // =====================
   // !duty
@@ -185,9 +203,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   const dutyChannel = getDutyChannel(interaction.guild);
 
-  // =====================
-  // DUTY ON
-  // =====================
   if (interaction.customId === "duty_on") {
 
     if (dutyStart[id]) {
@@ -204,9 +219,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return interaction.reply({ content: "Duty ON", ephemeral: true });
   }
 
-  // =====================
-  // DUTY OFF
-  // =====================
   if (interaction.customId === "duty_off") {
 
     if (!dutyStart[id]) {
@@ -226,9 +238,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return interaction.reply({ content: "Duty OFF", ephemeral: true });
   }
 
-  // =====================
-  // ÖSSZES IDŐ
-  // =====================
   if (interaction.customId === "duty_all") {
 
     const time = totalTime[id] || 0;
