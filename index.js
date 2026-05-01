@@ -5,14 +5,15 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  Events
+  Events,
+  EmbedBuilder
 } = require("discord.js");
 
 const fs = require("fs");
-const express = require("express"); // ⭐ FIX Render sleep ellen
+const express = require("express");
 
 // =====================
-// KEEP ALIVE SERVER (Render fix)
+// KEEP ALIVE (Render fix)
 // =====================
 const app = express();
 app.get("/", (req, res) => res.send("Bot is alive"));
@@ -56,13 +57,15 @@ const STAFF_ROLE_NAME = "Tulaj";
 const JUMPSCARE_IMAGE =
   "https://cdn.discordapp.com/attachments/1489342270644686911/1499492866756444370/image.gif";
 
-// duty channel
+// =====================
+// CHANNEL
+// =====================
 function getDutyChannel(guild) {
   return guild.channels.cache.find(c => c.name === "duty-2");
 }
 
 // =====================
-// FORMAT TIME
+// FORMAT
 // =====================
 function format(ms) {
   const sec = Math.floor(ms / 1000);
@@ -98,11 +101,15 @@ client.on("messageCreate", async (message) => {
     await message.channel.send("...");
 
     setTimeout(() => {
-      message.channel.send({
-        content: "😱 JUMPSCARE!",
-        files: [JUMPSCARE_IMAGE]
-      });
+      const embed = new EmbedBuilder()
+        .setTitle("😱 JUMPSCARE!")
+        .setImage(JUMPSCARE_IMAGE)
+        .setColor("Red");
+
+      message.channel.send({ embeds: [embed] });
     }, 1500);
+
+    return;
   }
 
   // !duty
@@ -110,15 +117,28 @@ client.on("messageCreate", async (message) => {
     if (!hasPerm(message.member)) return;
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId("duty_on").setLabel("🟢 Duty ON").setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId("duty_off").setLabel("🔴 Duty OFF").setStyle(ButtonStyle.Danger),
-      new ButtonBuilder().setCustomId("duty_all").setLabel("📊 Összes idő").setStyle(ButtonStyle.Primary)
+      new ButtonBuilder()
+        .setCustomId("duty_on")
+        .setLabel("🟢 Duty ON")
+        .setStyle(ButtonStyle.Success),
+
+      new ButtonBuilder()
+        .setCustomId("duty_off")
+        .setLabel("🔴 Duty OFF")
+        .setStyle(ButtonStyle.Danger),
+
+      new ButtonBuilder()
+        .setCustomId("duty_all")
+        .setLabel("📊 Összes idő")
+        .setStyle(ButtonStyle.Primary)
     );
 
-    return message.channel.send({
+    message.channel.send({
       content: "🛠 Duty rendszer",
       components: [row]
     });
+
+    return;
   }
 
   // !clear
@@ -130,6 +150,8 @@ client.on("messageCreate", async (message) => {
 
     const dutyChannel = getDutyChannel(message.guild);
     if (dutyChannel) dutyChannel.send("🧹 chat törölve");
+
+    return;
   }
 
   // !delete
@@ -154,6 +176,7 @@ client.on("messageCreate", async (message) => {
     }
 
     message.channel.send(`🧹 törölve: ${deleted}`);
+    return;
   }
 
   // !osszido
@@ -169,6 +192,8 @@ client.on("messageCreate", async (message) => {
     if (dutyChannel) {
       dutyChannel.send(`📊 ${user.username} összes ideje: ${format(time)}`);
     }
+
+    return;
   }
 });
 
@@ -221,5 +246,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
+// =====================
+// LOGIN
 // =====================
 client.login(process.env.TOKEN);
