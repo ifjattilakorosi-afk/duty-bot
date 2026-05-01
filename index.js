@@ -13,7 +13,7 @@ const fs = require("fs");
 const express = require("express");
 
 // =====================
-// KEEP ALIVE (Render fix)
+// KEEP ALIVE
 // =====================
 const app = express();
 app.get("/", (req, res) => res.send("Bot is alive"));
@@ -117,20 +117,9 @@ client.on("messageCreate", async (message) => {
     if (!hasPerm(message.member)) return;
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("duty_on")
-        .setLabel("🟢 Duty ON")
-        .setStyle(ButtonStyle.Success),
-
-      new ButtonBuilder()
-        .setCustomId("duty_off")
-        .setLabel("🔴 Duty OFF")
-        .setStyle(ButtonStyle.Danger),
-
-      new ButtonBuilder()
-        .setCustomId("duty_all")
-        .setLabel("📊 Összes idő")
-        .setStyle(ButtonStyle.Primary)
+      new ButtonBuilder().setCustomId("duty_on").setLabel("🟢 Duty ON").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("duty_off").setLabel("🔴 Duty OFF").setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId("duty_all").setLabel("📊 Összes idő").setStyle(ButtonStyle.Primary)
     );
 
     message.channel.send({
@@ -195,6 +184,57 @@ client.on("messageCreate", async (message) => {
 
     return;
   }
+
+  // =====================
+  // 🟢 NEW: !idotorles @user
+  // =====================
+  if (message.content.startsWith("!idotorles")) {
+    if (!hasPerm(message.member)) return;
+
+    const user = message.mentions.users.first();
+    if (!user) return message.channel.send("❌ Jelölj meg egy usert!");
+
+    delete totalTime[user.id];
+    delete dutyStart[user.id];
+
+    save();
+
+    const dutyChannel = getDutyChannel(message.guild);
+    if (dutyChannel) {
+      dutyChannel.send(`🗑 ${user.username} összes ideje törölve`);
+    }
+
+    message.channel.send("✔ Idő törölve");
+    return;
+  }
+
+  // =====================
+  // 🔴 NEW: !dutyoff @user
+  // =====================
+  if (message.content.startsWith("!dutyoff")) {
+    if (!hasPerm(message.member)) return;
+
+    const user = message.mentions.users.first();
+    if (!user) return message.channel.send("❌ Jelölj meg egy usert!");
+
+    if (!dutyStart[user.id]) {
+      return message.channel.send("❌ Az adott user nincs dutyban!");
+    }
+
+    const diff = Date.now() - dutyStart[user.id];
+    delete dutyStart[user.id];
+
+    totalTime[user.id] = (totalTime[user.id] || 0) + diff;
+    save();
+
+    const dutyChannel = getDutyChannel(message.guild);
+    if (dutyChannel) {
+      dutyChannel.send(`🔴 ${user.username} duty leállítva | ${format(diff)}`);
+    }
+
+    message.channel.send("✔ Duty OFF kész");
+    return;
+  }
 });
 
 // =====================
@@ -246,7 +286,5 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-// =====================
-// LOGIN
 // =====================
 client.login(process.env.TOKEN);
