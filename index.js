@@ -96,22 +96,23 @@ client.once("clientReady", () => {
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
-  // !ibi
-  if (message.content === "!ibi") {
-    await message.channel.send("...");
+// !ibi
+if (message.content === "!ibi") {
+  if (!hasPerm(message.member)) return;
 
-    setTimeout(() => {
-      const embed = new EmbedBuilder()
-        .setTitle("😱 JUMPSCARE!")
-        .setImage(JUMPSCARE_IMAGE)
-        .setColor("Red");
+  await message.channel.send("...");
 
-      message.channel.send({ embeds: [embed] });
-    }, 1500);
+  setTimeout(() => {
+    const embed = new EmbedBuilder()
+      .setTitle("😱 JUMPSCARE!")
+      .setImage(JUMPSCARE_IMAGE)
+      .setColor("Red");
 
-    return;
-  }
+    message.channel.send({ embeds: [embed] });
+  }, 1500);
 
+  return;
+}
   // !duty
   if (message.content === "!duty") {
     if (!hasPerm(message.member)) return;
