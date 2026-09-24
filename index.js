@@ -96,7 +96,7 @@ client.once("clientReady", () => {
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
-// /ibi
+// !ibi
 if (message.content === "!ibi") {
   if (!hasPerm(message.member)) return;
 
@@ -113,8 +113,8 @@ if (message.content === "!ibi") {
 
   return;
 }
-  // /duty
-  if (message.content === "/duty") {
+  // !duty
+  if (message.content === "!duty") {
     if (!hasPerm(message.member)) return;
 
     const row = new ActionRowBuilder().addComponents(
@@ -210,9 +210,9 @@ if (message.content === "!ibi") {
   }
 
   // =====================
-  // 🔴 NEW: /dutyoff @user
+  // 🔴 NEW: !dutyoff @user
   // =====================
-  if (message.content.startsWith("/dutyoff")) {
+  if (message.content.startsWith("!dutyoff")) {
     if (!hasPerm(message.member)) return;
 
     const user = message.mentions.users.first();
