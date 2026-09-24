@@ -1,4 +1,4 @@
-const {
+Hconst {
   Client,
   GatewayIntentBits,
   PermissionsBitField,
@@ -61,7 +61,7 @@ const JUMPSCARE_IMAGE =
 // CHANNEL
 // =====================
 function getDutyChannel(guild) {
-  return guild.channels.cache.find(c => c.name === "duty-2");
+  return guild.channels.cache.find(c => c.name === "『⏰』duty-mérő");
 }
 
 // =====================
@@ -96,7 +96,7 @@ client.once("clientReady", () => {
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
-// !ibi
+// /ibi
 if (message.content === "!ibi") {
   if (!hasPerm(message.member)) return;
 
@@ -113,8 +113,8 @@ if (message.content === "!ibi") {
 
   return;
 }
-  // !duty
-  if (message.content === "!duty") {
+  // /duty
+  if (message.content === "/duty") {
     if (!hasPerm(message.member)) return;
 
     const row = new ActionRowBuilder().addComponents(
@@ -169,8 +169,8 @@ if (message.content === "!ibi") {
     return;
   }
 
-  // !osszido
-  if (message.content.startsWith("!osszido")) {
+  // /osszido
+  if (message.content.startsWith("/osszido")) {
     if (!hasPerm(message.member)) return;
 
     const user = message.mentions.users.first();
@@ -187,9 +187,9 @@ if (message.content === "!ibi") {
   }
 
   // =====================
-  // 🟢 NEW: !idotorles @user
+  // 🟢 NEW: /idotorles @user
   // =====================
-  if (message.content.startsWith("!idotorles")) {
+  if (message.content.startsWith("/idotorles")) {
     if (!hasPerm(message.member)) return;
 
     const user = message.mentions.users.first();
@@ -210,9 +210,9 @@ if (message.content === "!ibi") {
   }
 
   // =====================
-  // 🔴 NEW: !dutyoff @user
+  // 🔴 NEW: /dutyoff @user
   // =====================
-  if (message.content.startsWith("!dutyoff")) {
+  if (message.content.startsWith("/dutyoff")) {
     if (!hasPerm(message.member)) return;
 
     const user = message.mentions.users.first();
@@ -283,7 +283,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     if (dutyChannel) dutyChannel.send(`📊 ${name} összes ideje: ${format(time)}`);
 
-    return interaction.reply({ content: "Kiírva duty-2-be", ephemeral: true });
+    return interaction.reply({ content: "Kiírva 『⏰』duty-mérő-be", ephemeral: true });
   }
 });
 
